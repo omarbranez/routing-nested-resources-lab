@@ -1,10 +1,32 @@
 class SongsController < ApplicationController
   def index
-    @songs = Song.all
+    if params[:artist_id] 
+      # if song artist exists
+      # @artist = Artist.find(params[:artist_id]) # doesnt account for nil, will just error out
+      @artist = Artist.find_by(id: params[:artist_id]) 
+      #but you can enter any number for artist id in the route
+      if @artist.nil?
+        redirect_to artists_path, alert: "Artist not found"
+      else
+        @songs = @artist.songs
+      end
+    else
+      @songs = Song.all
+    end
   end
 
   def show
-    @song = Song.find(params[:id])
+    if params[:artist_id]
+      @artist = Artist.find_by(id: params[:artist_id])
+      @song = @artist.songs.find_by(id: params[:id]) 
+      if @song.nil? 
+        # if the SONG id doesnt exist
+        redirect_to artist_songs_path(@artist), alert: "Song not found" # instead of flash[:alert] = 
+        # redirect to that ARTIST's show page
+      end
+    else
+      @song = Song.find(params[:id])
+    end
   end
 
   def new
